@@ -1,0 +1,34 @@
+# Git dosyaları
+.git
+.gitignore
+
+# Node modülleri ve bağımlılıklar
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Derleme çıktıları 
+/dist
+/build
+
+# Çevre değişkenleri
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE dosyaları
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# Docker dosyaları (opsiyonel)
+Dockerfile
+docker-compose.yml
+.dockerignore 
