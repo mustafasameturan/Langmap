@@ -5,5 +5,15 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  allowedHosts: ['langmap.server-mst.com.tr']
+  server: {
+    host: true,
+    cors: true,
+    allowedHosts: ['langmap.server-mst.com.tr', 'all']
+  },
+  preview: {
+    host: true,
+    port: 4173,
+    cors: true,
+    allowedHosts: ['langmap.server-mst.com.tr', '.server-mst.com.tr', 'localhost', 'all'] 
+  }
 })
