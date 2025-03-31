@@ -25,6 +25,8 @@ function App() {
     }
   }, [])
 
+  console.log("test");
+
   // Dark mode değiştiğinde localStorage'a kaydet ve HTML sınıfını güncelle
   useEffect(() => {
     localStorage.setItem('darkMode', darkMode)
