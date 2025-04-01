@@ -7,8 +7,5 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   preview: {
     allowedHosts: ["langmap.server-mst.com.tr"]
-  },
-  server: {
-    allowedHosts: ["langmap.server-mst.com.tr"]
   }
 })
