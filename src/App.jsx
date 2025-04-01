@@ -76,7 +76,7 @@ function App() {
         {/* Turu sıfırlamak için yardımcı buton (footer'a ekleyelim) */}
         <div className={`mt-8 text-center text-sm ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
           <p>
-            Langmap © 2023 | <button 
+            Langmap © {new Date().getFullYear()} | <button 
               onClick={resetTour} 
               className="text-indigo-500 hover:text-indigo-400 underline focus:outline-none"
             >
