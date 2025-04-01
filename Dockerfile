@@ -33,4 +33,4 @@ RUN npm ci --production
 EXPOSE 4173
 
 # Uygulamayı başlat
-CMD ["npm", "run", "preview"] 
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4173"] 
