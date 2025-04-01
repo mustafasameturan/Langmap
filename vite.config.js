@@ -6,19 +6,9 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   preview: {
-    port: 4173,
-    host: '0.0.0.0',
-    allowedHosts: ['langmap.server-mst.com.tr', 'localhost:4173'],
-    cors: {
-      origin: '*'
-    }
+    allowedHosts: true
   },
   server: {
-    port: 4173,
-    host: '0.0.0.0',
-    allowedHosts: ['langmap.server-mst.com.tr', 'localhost:4173'],
-    cors: {
-      origin: '*'
-    }
+    allowedHosts: true
   }
 })
