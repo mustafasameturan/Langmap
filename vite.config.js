@@ -7,7 +7,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
+    port: 4173,
     cors: true,
+    strictPort: true,
     allowedHosts: ['langmap.server-mst.com.tr', '*']
   },
   preview: {
