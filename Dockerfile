@@ -5,7 +5,7 @@ FROM node:18-alpine as build
 WORKDIR /app
 
 # Bağımlılıkları kopyala
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json vite.config.js ./
 
 # Bağımlılıkları yükle
 RUN npm ci
@@ -23,7 +23,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Sadece gerekli dosyaları kopyala
-COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/package.json /app/package-lock.json /app/vite.config.js ./
 COPY --from=build /app/dist ./dist
 
 # Sadece üretim bağımlılıklarını yükle
