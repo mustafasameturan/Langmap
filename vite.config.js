@@ -5,12 +5,20 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-	server: {
-		cors: {
-			origin: ['https://langmap.server-mst.com.tr', 'http://localhost:4173'],
-			methods: ['GET', 'POST'],
-			allowedHeaders: ['Content-Type']
-		},
-		allowedHosts: ['langmap.server-mst.com.tr', '*.server-mst.com.tr', 'localhost', '*']
-	}
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
+    allowedHosts: true,
+    cors: {
+      origin: '*'
+    }
+  },
+  server: {
+    port: 4173,
+    allowedHosts: true,
+    host: '0.0.0.0',
+    cors: {
+      origin: '*'
+    }
+  }
 })
