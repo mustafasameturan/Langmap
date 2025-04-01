@@ -8,12 +8,13 @@ export default defineConfig({
   server: {
     host: true,
     cors: true,
-    allowedHosts: ['langmap.server-mst.com.tr', 'all']
+    allowedHosts: ['langmap.server-mst.com.tr', '*']
   },
   preview: {
     host: true,
     port: 4173,
     cors: true,
-    allowedHosts: ['langmap.server-mst.com.tr', '.server-mst.com.tr', 'localhost', 'all'] 
+    strictPort: true,
+    allowedHosts: ['langmap.server-mst.com.tr', '.server-mst.com.tr', 'localhost', '*']
   }
 })
