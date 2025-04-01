@@ -6,9 +6,9 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   preview: {
-    allowedHosts: true
+    allowedHosts: ["langmap.server-mst.com.tr"]
   },
   server: {
-    allowedHosts: true
+    allowedHosts: ["langmap.server-mst.com.tr"]
   }
 })
