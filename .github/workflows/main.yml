@@ -19,7 +19,7 @@ jobs:
         key: ${{ secrets.UBUNTU_SSH_KEY }}
         port: 1453
         script: |
-          cd /home/projects/Langmap
+          cd /home/mst-projects/fe/Langmap
           
           git pull origin master
           
