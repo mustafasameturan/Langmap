@@ -59,7 +59,7 @@ function App() {
     window.location.reload();
   }
 
-  console.log('test')
+  console.log('test>>')
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-indigo-50 to-purple-50'}`}>
