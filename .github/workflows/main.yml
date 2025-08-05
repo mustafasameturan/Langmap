@@ -1,10 +1,10 @@
-name: Deploy Langmap to Ubuntu Server
+name: Deploy to Ubuntu Server
 
 on:
   push:
     branches:
       - master
-  workflow_dispatch:  # Manuel tetikleme imkanı
+  workflow_dispatch:
 
 env:
   PROJECT_PATH: /home/mst-projects/fe/Langmap
@@ -12,14 +12,39 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production  # GitHub environment protection
+    environment: production
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4  # v2 yerine güncel versiyon
+      uses: actions/checkout@v4
+
+    - name: 📱 Telegram - Deployment Started
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        format: markdown
+        message: |
+          🚀 **${{ github.event.repository.name }} Deployment STARTED**
+          
+          📦 **Commit:** `$(echo ${{ github.sha }} | cut -c1-7)`
+          📝 **Message:** ${{ github.event.head_commit.message }}
+          🌿 **Branch:** ${{ github.ref_name }}
+          👤 **Author:** ${{ github.actor }}
+          🕐 **Started:** $(date '+%H:%M:%S')
+          
+          ⏱️ **Estimated Duration:** ~3-5 minutes
+          🔄 **Status:** In Progress...
+          
+          _Please wait while the application is being deployed..._
+          
+    - name: ⏱️ Start Deployment Timer
+      id: deployment-timer
+      run: |
+        echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
       
     - name: Pre-deployment System Check
-      uses: appleboy/ssh-action@v1.0.0  # master yerine sabit versiyon
+      uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.UBUNTU_HOST }}
         username: ${{ secrets.UBUNTU_USERNAME }}
@@ -121,6 +146,27 @@ jobs:
           
           echo "✅ Cleanup completed"
 
+    - name: ⏱️ Calculate Deployment Duration
+      id: calc-duration
+      if: always()
+      run: |
+        start_time=${{ steps.deployment-timer.outputs.start_time }}
+        end_time=$(date +%s)
+        duration=$((end_time - start_time))
+        
+        # Convert to minutes and seconds
+        minutes=$((duration / 60))
+        seconds=$((duration % 60))
+        
+        if [ $minutes -gt 0 ]; then
+          duration_text="${minutes}m ${seconds}s"
+        else
+          duration_text="${seconds}s"
+        fi
+        
+        echo "duration=${duration_text}" >> $GITHUB_OUTPUT
+        echo "total_seconds=${duration}" >> $GITHUB_OUTPUT
+
     - name: Post-deployment Summary
       if: always()
       run: |
@@ -138,4 +184,27 @@ jobs:
           echo "🔗 Application URL: ${{ env.HEALTH_CHECK_URL }}"
         else
           echo "❌ Deployment failed - Check logs above"
-        fi    
+        fi
+
+    # Telegram notification
+    - name: 📱 Telegram - Deployment Completed
+      if: always()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        format: markdown
+        message: |
+          ${{ job.status == 'success' && format('✅ **{0} Deployment SUCCESS**', github.event.repository.name) || format('❌ **{0} Deployment FAILED**', github.event.repository.name) }}
+          
+          📦 **Commit:** `$(echo ${{ github.sha }} | cut -c1-7)`
+          📝 **Message:** ${{ github.event.head_commit.message }}
+          🌿 **Branch:** ${{ github.ref_name }}
+          👤 **Author:** ${{ github.actor }}
+          🕐 **Completed:** $(date '+%H:%M:%S')
+          ⏱️ **Duration:** ${{ steps.calc-duration.outputs.duration || 'N/A' }}
+          
+          ${{ job.status == 'success' && '🎉 **Application is live and healthy!**' || '⚠️ **Check logs for error details**' }}
+          ${{ job.status == 'success' && format('🔗 **URL:** {0}', env.HEALTH_CHECK_URL) || '' }}
+          
+          ${{ job.status == 'success' && '_Deployment completed successfully! 🚀_' || '_Deployment failed. Manual check required. 🔧_' }}
