@@ -111,7 +111,7 @@ jobs:
           
           # Yeni container'ları başlat
           echo "🔄 Starting updated containers..."
-          docker compose up -d --build --force-recreate --remove-orphans
+          docker compose up -d --build --remove-orphans
           
           # Container'ların başlamasını bekle
           echo "⏳ Waiting for containers to be ready..."
