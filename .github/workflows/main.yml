@@ -1,28 +1,141 @@
-name: Deploy to Ubuntu 22.04 Server
+name: Deploy Langmap to Ubuntu Server
 
 on:
   push:
     branches:
       - master
+  workflow_dispatch:  # Manuel tetikleme imkanı
+
+env:
+  PROJECT_PATH: /home/mst-projects/fe/Langmap
 
 jobs:
-  publish:
+  deploy:
     runs-on: ubuntu-latest
+    environment: production  # GitHub environment protection
+    
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v4  # v2 yerine güncel versiyon
+      
+    - name: Pre-deployment System Check
+      uses: appleboy/ssh-action@v1.0.0  # master yerine sabit versiyon
+      with:
+        host: ${{ secrets.UBUNTU_HOST }}
+        username: ${{ secrets.UBUNTU_USERNAME }}
+        key: ${{ secrets.UBUNTU_SSH_KEY }}
+        port: 1453
+        timeout: 30s
+        script: |
+          echo "🔍 Pre-deployment system checks..."
+          
+          # Disk space kontrolü
+          DISK_USAGE=$(df /home | tail -1 | awk '{print $5}' | sed 's/%//')
+          if [ $DISK_USAGE -gt 85 ]; then
+            echo "❌ ERROR: Disk usage is ${DISK_USAGE}%. Deployment aborted!"
+            exit 1
+          fi
+          echo "✅ Disk usage: ${DISK_USAGE}% (OK)"
+          
+          # Memory kontrolü
+          FREE_MEM=$(free | awk 'FNR==2{printf "%.1f", $7/1024/1024}')
+          echo "✅ Available memory: ${FREE_MEM}GB"
+          
+          # Docker servis kontrolü
+          if ! systemctl is-active docker >/dev/null 2>&1; then
+            echo "❌ Docker service is not running!"
+            exit 1
+          fi
+          echo "✅ Docker service is running"
+          
+          echo "🎯 System checks completed successfully"
 
-    - name: Deploy to Server
-      uses: appleboy/ssh-action@master
+    - name: Deploy Application
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.UBUNTU_HOST }}
+        username: ${{ secrets.UBUNTU_USERNAME }}
+        key: ${{ secrets.UBUNTU_SSH_KEY }}
+        port: 1453
+        command_timeout: 15m  # Timeout eklendi
+        script: |
+          cd ${{ env.PROJECT_PATH }}
+          
+          echo "🚀 Starting deployment process..."
+          echo "📍 Commit: ${{ github.sha }}"
+          echo "🌿 Branch: ${{ github.ref_name }}"
+          echo "👤 Triggered by: ${{ github.actor }}"
+          echo "🕐 Time: $(date)"
+          
+          # Git güncellemesi
+          echo "📥 Pulling latest changes..."
+          git stash --include-untracked >/dev/null 2>&1 || true
+          git pull origin master
+          
+          # Portainer ayarlarını korumak için container'ları graceful shutdown
+          echo "🛑 Gracefully stopping containers..."
+          docker compose down --timeout 45
+          
+          # Yeni container'ları başlat
+          echo "🔄 Starting updated containers..."
+          docker compose up -d --build --force-recreate --remove-orphans
+          
+          # Container'ların başlamasını bekle
+          echo "⏳ Waiting for containers to be ready..."
+          sleep 30
+          
+          # Container durumlarını kontrol et
+          echo "📊 Container status:"
+          docker compose ps
+          
+          echo "✅ Deployment process completed!"
+
+    - name: Cleanup Resources
+      uses: appleboy/ssh-action@v1.0.0
+      if: always()  # Her durumda çalıştır
       with:
         host: ${{ secrets.UBUNTU_HOST }}
         username: ${{ secrets.UBUNTU_USERNAME }}
         key: ${{ secrets.UBUNTU_SSH_KEY }}
         port: 1453
         script: |
-          cd /home/mst-projects/fe/Langmap
+          cd ${{ env.PROJECT_PATH }}
           
-          git pull origin master
+          echo "🧹 Cleaning up resources..."
           
-          docker compose up -d --build --force-recreate
-          
+          # Kullanılmayan image'ları temizle
           docker image prune -f
+          
+          # Kullanılmayan volume'ları temizle (dikkatli)
+          docker volume prune -f
+          
+          # Eski backup'ları temizle (30 günden eski)
+          find backups/ -type f -mtime +30 -delete 2>/dev/null || true
+          find backups/ -type d -empty -delete 2>/dev/null || true
+          
+          # Build cache'i temizle (haftalık)
+          if [ $(date +%u) -eq 1 ]; then  # Pazartesi
+            echo "📅 Weekly deep clean..."
+            docker builder prune -af --filter until=168h  # 7 gün
+          fi
+          
+          echo "✅ Cleanup completed"
+
+    - name: Post-deployment Summary
+      if: always()
+      run: |
+        echo "📋 Deployment Summary"
+        echo "===================="
+        echo "🏷️  Repository: ${{ github.repository }}"
+        echo "📦 Commit: ${{ github.sha }}"
+        echo "🌿 Branch: ${{ github.ref_name }}"
+        echo "👤 Actor: ${{ github.actor }}"
+        echo "🕐 Time: $(date)"
+        echo "📈 Status: ${{ job.status }}"
+        
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "🎉 Deployment completed successfully!"
+          echo "🔗 Application URL: ${{ env.HEALTH_CHECK_URL }}"
+        else
+          echo "❌ Deployment failed - Check logs above"
+        fi    
