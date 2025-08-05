@@ -12,7 +12,7 @@ function App() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false)
   const [keysChanged, setKeysChanged] = useState(false)
 
-  console.log('samet');
+  console.log('samet 2');
   
   // Dark mode tercihini localStorage'dan al veya varsayılan olarak dark mode kullan
   useEffect(() => {
