@@ -27,11 +27,9 @@ jobs:
         message: |
           🚀 **${{ github.event.repository.name }} Deployment STARTED**
           
-          📦 **Commit:** `${{ steps.commit-info.outputs.short_sha }}`
           📝 **Message:** ${{ github.event.head_commit.message }}
           🌿 **Branch:** ${{ github.ref_name }}
           👤 **Author:** ${{ github.actor }}
-          🕐 **Started:** ${{ steps.time-info.outputs.start_time }}
           
           ⏱️ **Estimated Duration:** ~1-5 minutes
           🔄 **Status:** In Progress...
@@ -211,7 +209,6 @@ jobs:
           📝 **Message:** ${{ github.event.head_commit.message }}
           🌿 **Branch:** ${{ github.ref_name }}
           👤 **Author:** ${{ github.actor }}
-          🕐 **Completed:** ${{ steps.calc-duration.outputs.end_time }}
           ⏱️ **Duration:** ${{ steps.calc-duration.outputs.duration || 'N/A' }}
           
           ${{ job.status == 'success' && '🎉 **Application is live and healthy!**' || '⚠️ **Check logs for error details**' }}
