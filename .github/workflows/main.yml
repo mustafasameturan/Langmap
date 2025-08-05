@@ -212,6 +212,5 @@ jobs:
           ⏱️ **Duration:** ${{ steps.calc-duration.outputs.duration || 'N/A' }}
           
           ${{ job.status == 'success' && '🎉 **Application is live and healthy!**' || '⚠️ **Check logs for error details**' }}
-          ${{ job.status == 'success' && format('🔗 **URL:** {0}', env.HEALTH_CHECK_URL) || '' }}
           
           ${{ job.status == 'success' && '_Deployment completed successfully! 🚀_' || '_Deployment failed. Manual check required. 🔧_' }}
